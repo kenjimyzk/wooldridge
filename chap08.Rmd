@@ -1,0 +1,106 @@
+---
+title: "R Notebook"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(AER)
+library(wooldridge)
+```
+
+## example 8.2
+
+```{r}
+data(gpa3)
+df <- subset(gpa3, term==2)
+```
+
+```{r}
+fm <- lm(cumgpa~sat+hsperc+tothrs+female+black+white,data=df)
+summary(fm)
+```
+
+```{r}
+coeftest(fm, vcov=vcovHC(fm,type="HC0"))
+```
+
+```{r}
+fm0 <- update(fm, .~. - black - white)
+waldtest(fm0, fm)
+```
+
+
+```{r}
+waldtest(fm0,fm,vcov=vcovHC(fm,type="HC0"))
+```
+
+## example 8.3
+```{r}
+data(crime1)
+summary(crime1)
+```
+
+```{r}
+fm <- lm(narr86~pcnv+avgsen+I(avgsen^2) + ptime86+qemp86+inc86+black+hispan,data=crime1)
+summary(fm)
+```
+
+```{r}
+coeftest(fm, vcov=vcovHC(fm,type="HC0"))
+```
+
+```{r}
+fm0 <- update(fm, .~. -avgsen -I(avgsen^2))
+aux <- update(fm,resid(fm0) ~.)
+nrow(crime1)*summary(aux)$r.squared
+```
+
+## example 8.4
+```{r}
+data(hprice1)
+fm <- lm(price~lotsize+sqrft+bdrms, data=hprice1)
+summary(fm)
+```
+
+```{r}
+aux <- update(fm, I(resid(fm)^2)~.)
+rsq <- summary(aux)$r.squared
+df <- fm$df
+n <- nrow(hprice1)
+(F <- (rsq/(1-rsq)) * df/3)
+(LM <- n* rsq)
+```
+
+```{r}
+fm <- lm(log(price)~log(lotsize)+log(sqrft)+bdrms, data=hprice1)
+summary(fm)
+```
+```{r}
+aux <- update(fm, I(resid(fm)^2)~.)
+rsq <- summary(aux)$r.squared
+df <- fm$df
+n <- nrow(hprice1)
+(F <- (rsq/(1-rsq)) * df/3)
+(LM <- n* rsq)
+```
+
+```{r}
+bptest(fm)
+```
+
+
+## example 8.5
+```{r}
+aux <- update(aux, .~ fitted(fm)+I(fitted(fm)^2))
+(rsq <- summary(aux)$r.squared)
+n <- nrow(hprice1)
+(LM <- n* rsq)
+```
+
+```{r}
+bptest(fm, I(resid(fm)^2)~fitted(fm)+I(fitted(fm)^2))
+```
+
