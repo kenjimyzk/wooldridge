@@ -1,0 +1,125 @@
+---
+title: "chap07"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(AER)
+library(wooldridge)
+```
+
+## example 7.1
+```{r}
+data(wage1)
+olsreg<- lm(wage~female+educ+exper+tenure,data=wage1)
+summary(olsreg)
+```
+
+## example 7.2
+```{r}
+data(gpa1)
+olsreg <- lm(colGPA~PC+hsGPA+ACT, data=gpa1)
+summary(olsreg)
+```
+
+## example 7.3
+```{r}
+data(jtrain)
+olsreg<-lm(hrsemp~grant+lsales+lemploy,data=jtrain,subset=(year==1988))
+summary(olsreg)
+```
+
+## example 7.4
+```{r}
+data(hprice1)
+olsreg<-lm(log(price)~log(lotsize)+log(sqrft)+bdrms+colonial,data=hprice1)
+summary(olsreg)
+```
+
+## example 7.5
+```{r}
+data(wage1)
+olsreg<- lm(log(wage)~married+female+educ+exper+I(exper^2)+tenure+I(tenure^2),data=wage1)
+summary(olsreg)
+(coeffemale <- coef(olsreg)["female"])
+exp(coeffemale)-1
+```
+
+## example 7.6
+```{r}
+data(wage1)
+olsreg<- lm(log(wage)~married*female+educ+exper+I(exper^2)+tenure+I(tenure^2),data=wage1)
+summary(olsreg)
+```
+
+## Example 7.7
+Dataset is not available
+
+## example 7.8
+```{r}
+data(lawsch85)
+lawsch85$r61_100 <- with(lawsch85, ifelse(rank>60 & rank<101,1,0))
+olsreg<-lm(log(salary)~top10 + r11_25 + r26_40 + r41_60 + r61_100 +
+           LSAT+GPA+log(libvol)+log(cost),data=lawsch85)
+summary(olsreg)
+
+```
+
+```{r}
+cutpts <- c(0,10,25,40,60,100,175)
+lawsch85$rankcat <- cut(lawsch85$rank,cutpts)
+table(lawsch85$rankcat)
+```
+```{r}
+lawsch85$rankcat <- relevel(lawsch85$rankcat,"(100,175]")
+olsreg<-lm(log(salary)~rankcat+LSAT+GPA+log(libvol)+log(cost),data=lawsch85)
+summary(olsreg)
+```
+
+## Example 7.9
+Dataset is not available
+
+## example 7.10
+```{r}
+data(wage1)
+olsreg<- lm(log(wage)~female*educ+exper+I(exper^2)+tenure+I(tenure^2),data=wage1)
+summary(olsreg)
+```
+
+```{r}
+olsreg0<- update(olsreg, .~educ+exper+I(exper^2)+tenure+I(tenure^2))
+anova(olsreg0,olsreg)
+```
+
+## example 7.11
+```{r}
+data(mlb1)
+olsreg <- lm(lsalary ~ years + gamesyr +  bavg + hrunsyr + 
+               rbisyr + runsyr + fldperc + allstar + black + 
+               hispan + blckpb + hispph, data=mlb1)
+summary(olsreg)
+```
+```{r}
+olsreg0<-update(olsreg, . ~ . -black - hispan - blkpb - hispph)
+anova(olsreg0,olsreg)
+```
+
+## example 7.12
+```{r}
+data(crime1)
+crime1$arr86 <- with(crime1, ifelse(narr86>0,1,0))
+olsreg <- lm(arr86 ~pcnv+avgsen+tottime+ptime86+qemp86,data=crime1)
+summary(olsreg)
+```
+
+```{r}
+olsreg1 <- update(olsreg, . ~ . + black + hispan)
+summary(olsreg1)
+```
+

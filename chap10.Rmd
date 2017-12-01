@@ -1,0 +1,127 @@
+---
+title: "chap10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+opts_chunk$set(echo = TRUE)
+```
+
+
+```{r message=FALSE, warning=FALSE}
+library(tidyverse)
+library(AER)
+library(wooldridge)
+library(dynlm)
+```
+
+## example 10.1
+```{r}
+data(phillips)
+tsdata<-ts(subset(phillips, year<=1996), start=1948)
+res <- dynlm(inf ~ unem, data= tsdata)
+summary(res)
+```
+
+## example 10.2
+```{r}
+data(intdef)
+tsdata <- ts(intdef, start = 1948)
+olsreg <- lm(i3~inf+def, data= tsdata)
+summary(olsreg)
+```
+
+## example 10.3
+```{r}
+data(prmingwge)
+tsdata<-ts(prminwge, start=1950)
+res <- dynlm(log(prepop)~log(mincov)+log(usgnp),data=tsdata)
+summary(res)
+```
+
+## example 10.4
+```{r}
+data(fertil3)
+tsdata <- ts(fertil3,start=1913)
+res <- dynlm(gfr~pe+L(pe)+L(pe, 2)+ww2+pill,data=tsdata)
+coeftest(res)
+linearHypothesis(res,c("pe=0", "L(pe)=0", "L(pe, 2) = 0"))
+linearHypothesis(res,"pe + L(pe) + L(pe, 2) = 0")
+```
+
+## example 10.5
+```{r}
+data(barium)
+tsdata <- ts(barium, start = c(1978,2),frequency = 12)
+res <- dynlm(log(chnimp) ~ log(chempi) + log(gas) + log(rtwex) +
+               befile6 + affile6 + afdec6, data=tsdata)
+summary(res)
+```
+
+## example 10.6
+```{r}
+data(fair)
+res <- lm(demvote ~ partyWH + incum + pWHgnews + pWHinf, data=fair)
+summary(res)
+```
+
+
+## example 10.7
+```{r}
+data(hseinv)
+tsdata <- ts(hseinv, start=1947)
+res1 <- dynlm(log(invpc) ~ log(price), data=tsdata)
+summary(res1)
+res2 <- dynlm(log(invpc) ~ log(price) +trend(tsdata), data=tsdata)
+summary(res2)
+```
+
+## example 10.8
+```{r}
+data(fertil3)
+tsdata <- ts(fertil3,start=1913)
+res1 <- dynlm(gfr~pe+ww2+pill+trend(tsdata),data=tsdata)
+coeftest(res1)
+res2 <- lm(gfr~pe+ww2+pill+t+tsq,data=tsdata)
+coeftest(res2)
+```
+
+## example 10.9
+```{r}
+data(prmingwge)
+tsdata<-ts(prminwge, start=1950)
+res <- dynlm(log(prepop)~log(mincov)+log(usgnp) + trend(tsdata),data=tsdata)
+summary(res)
+```
+
+
+## example 10.10
+```{r}
+data(hseinv)
+tsdata <- ts(hseinv, start=1947)
+dtlinvpc <- dynlm(log(invpc) ~ trend(tsdata), data=tsdata)
+dtlprice <- dynlm(log(price) ~ trend(tsdata), data=tsdata)
+olsreg <-lm(resid(dtlinvpc)~resid(dtlprice))
+summary(olsreg)
+```
+
+
+## example 10.11
+```{r}
+data(barium)
+tsdata <- ts(barium, start = c(1978,2),frequency = 12)
+res <- dynlm(log(chnimp) ~ log(chempi) + log(gas) + log(rtwex) +
+               befile6 + affile6 + afdec6 + season(tsdata), data=tsdata)
+summary(res)
+```
+
+```{r}
+res0 <- update(res,. ~ . - season(tsdata))
+summary(res0)
+```
+
+```{r}
+anova(res0,res)
+```
+

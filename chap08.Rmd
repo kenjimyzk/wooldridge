@@ -11,6 +11,21 @@ library(AER)
 library(wooldridge)
 ```
 
+## example 8.1
+```{r}
+data(wage1)
+wage1$marrmale<- with(wage1, married*(1-female))
+wage1$marrfem <- with(wage1, married*female)
+wage1$singfem <- with(wage1, (1-married)*female)
+olsreg<- lm(log(wage)~marrmale+marrfem+singfem+educ+exper+I(exper^2)+tenure+I(tenure^2),data=wage1)
+summary(olsreg)
+```
+
+```{r}
+coeftest(olsreg, vcov=vcovHC(olsreg,type="HC0"))
+```
+
+
 ## example 8.2
 
 ```{r}
@@ -85,6 +100,7 @@ df <- fm$df
 n <- nrow(hprice1)
 (F <- (rsq/(1-rsq)) * df/3)
 (LM <- n* rsq)
+(1-pchisq(LM,df = 3))
 ```
 
 ```{r}
@@ -98,9 +114,68 @@ aux <- update(aux, .~ fitted(fm)+I(fitted(fm)^2))
 (rsq <- summary(aux)$r.squared)
 n <- nrow(hprice1)
 (LM <- n* rsq)
+(1-pchisq(LM,df = 2))
 ```
 
 ```{r}
-bptest(fm, I(resid(fm)^2)~fitted(fm)+I(fitted(fm)^2))
+bptest(fm, ~fitted(fm)+I(fitted(fm)^2))
 ```
 
+## exmample 8.6
+```{r}
+data(k401ksubs)
+olsreg <- lm(nettfa ~ inc + I((age-25)^2) + male + e401k, data=k401ksubs, subset=(fsize==1))
+coeftest(olsreg)
+```
+
+```{r}
+wlsreg <- update(olsreg, weight=1/inc)
+coeftest(wlsreg)
+coeftest(wlsreg,hccm)
+```
+
+## example 8.7
+```{r}
+data(smoke)
+olsreg <- lm(cigs~log(income)+log(cigpric)+educ+age+I(age^2)+restaurn,data=smoke)
+coeftest(olsreg)
+```
+
+```{r}
+bptest(olsreg)
+```
+
+```{r}
+varreg<-lm(log(I(resid(olsreg)^2)) ~ lincome+log(cigpric)+educ+age+I(age^2)+restaurn, data=smoke)
+w <- 1/exp(fitted(varreg))
+wlsreg <- update(olsreg, .~., weight = w)
+coeftest(wlsreg)
+```
+
+## example 8.8
+```{r}
+data(mroz)
+olsreg <- lm(inlf~nwifeinc+educ+exper+expersq+age+kidslt6+kidsge6, data=mroz)
+summary(olsreg)
+```
+
+```{r}
+coeftest(olsreg,hccm)
+```
+
+## example 8.9
+```{r}
+data(gpa1)
+gpa1$parcall <- with(gpa1, parcall <- 1- (1-fathcoll) * (1-mothcoll))
+olsreg<-lm(PC~hsGPA+ACT+parcall,data=gpa1)
+summary(olsreg)
+```
+```{r}
+coeftest(olsreg,hccm)
+```
+```{r}
+varreg<-fitted(olsreg)*(1-fitted(olsreg))
+w <- 1/varreg
+wlsreg <- update(olsreg, .~., weight = w)
+coeftest(wlsreg)
+```
